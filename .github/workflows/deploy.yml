@@ -35,6 +35,9 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
+      - name: Check env in bundle
+        run: grep -o "igxddali\|supabaseUrl" dist/assets/*.js | head -5
+
       - name: Check built file for env vars
         run: grep -o "VITE_SUPABASE_URL\|supabase\.co" dist/assets/*.js | head -5
 
