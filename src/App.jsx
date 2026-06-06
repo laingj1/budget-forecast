@@ -80,84 +80,307 @@ function LoginScreen() {
   }
 
   return (
-    <div className="login-wrap">
-      <div className="login-card">
-        <h1 className="login-title">Budget <em>Forecast</em></h1>
-        <p className="login-sub">
-          {mode === "login" ? "Sign in to your account" : "Reset your password"}
-        </p>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+          --bg: #111113; --surf: #18181b; --surf2: #222226; --border: #2c2c32;
+          --text: #eeecea; --muted: #666470; --gold: #f0c060; --expense: #f87171;
+          --r: 14px; --rs: 8px;
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; }
 
-        {mode === "login" && (
-          <form className="login-form" onSubmit={handleLogin}>
-            <div className="login-field">
-              <label className="login-label">Email</label>
-              <input
-                className="login-input"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@email.com"
-                required
-              />
-            </div>
-            <div className="login-field">
-              <label className="login-label">Password</label>
-              <input
-                className="login-input"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            {error && <p className="login-error">{error}</p>}
-            <button className="login-btn" type="submit" disabled={loading}>
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
-            <button
-              type="button"
-              className="login-link"
-              onClick={() => { setMode("reset"); setError(""); }}
-            >
-              Forgot password?
-            </button>
-          </form>
-        )}
+        .login-page {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1.5rem;
+          background: var(--bg);
+          background-image:
+            radial-gradient(ellipse at 20% 50%, rgba(240,192,96,0.04) 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 20%, rgba(96,165,250,0.03) 0%, transparent 50%);
+        }
 
-        {mode === "reset" && !resetSent && (
-          <form className="login-form" onSubmit={handleReset}>
-            <div className="login-field">
-              <label className="login-label">Email</label>
-              <input
-                className="login-input"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@email.com"
-                required
-              />
-            </div>
-            {error && <p className="login-error">{error}</p>}
-            <button className="login-btn" type="submit" disabled={loading}>
-              {loading ? "Sending…" : "Send reset link"}
-            </button>
-            <button type="button" className="login-link" onClick={() => setMode("login")}>
-              Back to sign in
-            </button>
-          </form>
-        )}
+        .login-card {
+          width: 100%;
+          max-width: 420px;
+          background: var(--surf);
+          border: 1px solid var(--border);
+          border-radius: var(--r);
+          overflow: hidden;
+          position: relative;
+        }
 
-        {mode === "reset" && resetSent && (
-          <div className="login-success">
-            <p>Check your email for a password reset link.</p>
-            <button type="button" className="login-link" onClick={() => { setMode("login"); setResetSent(false); }}>
-              Back to sign in
-            </button>
+        .login-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, var(--gold), rgba(240,192,96,0.2), transparent);
+        }
+
+        .login-top {
+          padding: 2.25rem 2rem 1.75rem;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .login-eyebrow {
+          font-size: .65rem;
+          text-transform: uppercase;
+          letter-spacing: .15em;
+          color: var(--gold);
+          font-weight: 600;
+          margin-bottom: .6rem;
+          opacity: .8;
+        }
+
+        .login-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 2rem;
+          letter-spacing: -.02em;
+          line-height: 1.1;
+          color: var(--text);
+        }
+
+        .login-title em { color: var(--gold); font-style: italic; }
+
+        .login-sub {
+          font-size: .78rem;
+          color: var(--muted);
+          margin-top: .4rem;
+          font-weight: 300;
+        }
+
+        .login-body { padding: 1.75rem 2rem 2rem; }
+
+        .login-form { display: grid; gap: .9rem; }
+
+        .login-field { display: grid; gap: .4rem; }
+
+        .login-label {
+          font-size: .67rem;
+          text-transform: uppercase;
+          letter-spacing: .1em;
+          color: var(--muted);
+          font-weight: 500;
+        }
+
+        .login-input {
+          background: var(--surf2);
+          border: 1px solid var(--border);
+          color: var(--text);
+          font-family: 'Sora', sans-serif;
+          font-size: .92rem;
+          border-radius: var(--rs);
+          padding: .75rem .9rem;
+          outline: none;
+          transition: border-color .15s, box-shadow .15s;
+          width: 100%;
+        }
+
+        .login-input:focus {
+          border-color: var(--gold);
+          box-shadow: 0 0 0 3px rgba(240,192,96,.08);
+        }
+
+        .login-input::placeholder { color: var(--muted); opacity: .6; }
+
+        .login-btn {
+          background: var(--gold);
+          color: #111;
+          border: none;
+          border-radius: var(--rs);
+          font-family: 'Sora', sans-serif;
+          font-size: .9rem;
+          font-weight: 600;
+          padding: .85rem;
+          cursor: pointer;
+          margin-top: .35rem;
+          transition: opacity .13s, transform .13s;
+          letter-spacing: .01em;
+        }
+
+        .login-btn:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+        .login-btn:active:not(:disabled) { transform: scale(.98); }
+        .login-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+        .login-divider {
+          display: flex;
+          align-items: center;
+          gap: .75rem;
+          margin: .25rem 0;
+        }
+
+        .login-divider::before, .login-divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: var(--border);
+        }
+
+        .login-divider span {
+          font-size: .65rem;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: .08em;
+        }
+
+        .login-link {
+          background: none;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          font-family: 'Sora', sans-serif;
+          font-size: .8rem;
+          cursor: pointer;
+          padding: .65rem;
+          border-radius: var(--rs);
+          transition: all .13s;
+          width: 100%;
+          text-align: center;
+        }
+
+        .login-link:hover { color: var(--text); border-color: #444; }
+
+        .login-error {
+          font-size: .78rem;
+          color: var(--expense);
+          background: rgba(248,113,113,.08);
+          padding: .65rem .8rem;
+          border-radius: var(--rs);
+          border: 1px solid rgba(248,113,113,.2);
+        }
+
+        .login-success {
+          text-align: center;
+          display: grid;
+          gap: 1rem;
+          padding: .5rem 0;
+        }
+
+        .login-success-icon {
+          font-size: 2rem;
+          display: block;
+          margin-bottom: .25rem;
+        }
+
+        .login-success p {
+          font-size: .85rem;
+          color: var(--muted);
+          line-height: 1.5;
+        }
+
+        .login-success strong { color: var(--text); }
+
+        .login-loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: .5rem;
+        }
+
+        .login-spinner {
+          width: 14px;
+          height: 14px;
+          border: 2px solid rgba(17,17,17,.3);
+          border-top-color: #111;
+          border-radius: 50%;
+          animation: lspin .6s linear infinite;
+        }
+
+        @keyframes lspin { to { transform: rotate(360deg); } }
+      `}</style>
+
+      <div className="login-page">
+        <div className="login-card">
+          <div className="login-top">
+            <p className="login-eyebrow">Private Access</p>
+            <h1 className="login-title">Budget <em>Forecast</em></h1>
+            <p className="login-sub">
+              {mode === "login" ? "Sign in to your account to continue" : "We'll send you a reset link"}
+            </p>
           </div>
-        )}
+
+          <div className="login-body">
+            {mode === "login" && (
+              <form className="login-form" onSubmit={handleLogin}>
+                <div className="login-field">
+                  <label className="login-label">Email</label>
+                  <input
+                    className="login-input"
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="you@email.com"
+                    required
+                    autoFocus
+                  />
+                </div>
+                <div className="login-field">
+                  <label className="login-label">Password</label>
+                  <input
+                    className="login-input"
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+                {error && <p className="login-error">{error}</p>}
+                <button className="login-btn" type="submit" disabled={loading}>
+                  {loading
+                    ? <span className="login-loading"><span className="login-spinner" /> Signing in…</span>
+                    : "Sign in"}
+                </button>
+                <div className="login-divider"><span>or</span></div>
+                <button type="button" className="login-link" onClick={() => { setMode("reset"); setError(""); }}>
+                  Forgot password?
+                </button>
+              </form>
+            )}
+
+            {mode === "reset" && !resetSent && (
+              <form className="login-form" onSubmit={handleReset}>
+                <div className="login-field">
+                  <label className="login-label">Email</label>
+                  <input
+                    className="login-input"
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="you@email.com"
+                    required
+                    autoFocus
+                  />
+                </div>
+                {error && <p className="login-error">{error}</p>}
+                <button className="login-btn" type="submit" disabled={loading}>
+                  {loading
+                    ? <span className="login-loading"><span className="login-spinner" /> Sending…</span>
+                    : "Send reset link"}
+                </button>
+                <div className="login-divider"><span>or</span></div>
+                <button type="button" className="login-link" onClick={() => { setMode("login"); setError(""); }}>
+                  Back to sign in
+                </button>
+              </form>
+            )}
+
+            {mode === "reset" && resetSent && (
+              <div className="login-success">
+                <span className="login-success-icon">✉️</span>
+                <p>Check your inbox — we sent a reset link to <strong>{email}</strong></p>
+                <button type="button" className="login-link" onClick={() => { setMode("login"); setResetSent(false); }}>
+                  Back to sign in
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
