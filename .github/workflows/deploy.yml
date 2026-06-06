@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - main  # runs every time you push to main
+      - main
 
 jobs:
   build:
@@ -23,6 +23,9 @@ jobs:
 
       - name: Build the app
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Add .htaccess file
         run: |
@@ -40,10 +43,3 @@ jobs:
           publish_dir: ./dist
           publish_branch: build
           force_orphan: true
-
-
-      - name: Build the app
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
