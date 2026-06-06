@@ -21,6 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Debug env vars
+        run: |
+          echo "URL length: ${#VITE_SUPABASE_URL}"
+          echo "KEY length: ${#VITE_SUPABASE_ANON_KEY}"
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
       - name: Build the app
         run: npm run build
         env:
